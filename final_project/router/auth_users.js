@@ -15,14 +15,43 @@ const authenticatedUser = (username,password)=>{ //returns boolean
 
 //only registered users can login
 regd_users.post("/login", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+    const {username, password} = req.body;
+    if(!username || !password) {
+        return res.status(403).json({message: "Username, Password, or Both not Provided"})
+    }
+    const user = users.find(user => user.username === username && user.password === password)
+    if (!user){
+        return res.status(403).json({message: "Username, Password, or Both are Incorrect"})
+    } 
+    const token = jwt.sign({
+        data : username
+    }, 'fingerprint_customer', { 
+        expiresIn : 60 * 60 
+    })
+
+    req.session.authorization = {
+        token, username
+    }
+    return res.status(200).json({message: "User successfully logged in"});
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const review = req.body.review;
+  const reviews = books[req.params.isbn].reviews
+  console.log(req.user)
+  if(reviews) {
+    reviews[req.user.data] = review;
+  }
+  return res.status(200).send(reviews);
+});
+
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const reviews = books[req.params.isbn].reviews
+    books[req.params.isbn].reviews =
+
+
 });
 
 module.exports.authenticated = regd_users;
