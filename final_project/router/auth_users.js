@@ -49,9 +49,12 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 regd_users.delete("/auth/review/:isbn", (req, res) => {
     const reviews = books[req.params.isbn].reviews
-    books[req.params.isbn].reviews =
-
-
+    const username = req.user.data
+    if (!reviews[username]){
+        return res.status(403).json({message: "No reviews found for this user"})
+    }
+    delete reviews[username]
+    return res.status(200).send(reviews);
 });
 
 module.exports.authenticated = regd_users;
